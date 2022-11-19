@@ -44,7 +44,7 @@ setup(
     zip_safe=False,
     entry_points={
         'console_scripts': [
-            'argp = argp.main:main',
+            'main = examples.main:main',
         ],
     },
     test_suite='test',
