@@ -39,17 +39,22 @@ ArgParser = typing.NewType("ArgParser", None)
 Command = typing.NewType("Command", ArgParser)
 Argp = typing.NewType("Argp", ArgParser)
 
+def map_keys_to_dict(keys: list[str], value: typing.Any):
+    ''' Creates a dictionary with multiple keys pointing to the same value '''
+    # multi_key_dict = {}
+    # for key in keys:
+        # multi_key_dict[key] = value
+    # return multi_key_dict
+    return {key:value for key in keys}
+
 class Option():
     def __init__(self, short: str, long: str, id:str = '', val: typing.Any = None, flag = False,
                  cb: typing.Callable = None, help='', *args, **kwargs):
-        self.argids = ArgID(self, [short, long, id])
+        self.argids = map_keys_to_dict([short, long, id], self)
         self.flag = flag
         self.val = val
         self.cb = cb
         self.help = help
-
-    def get_comp(self, id: str):
-        return self.argids.get_comp(id)
 
     def is_flag(self):
         return True if self.flag else False
@@ -59,31 +64,10 @@ class Command():
     def __init__(self, id='', cli_defs: list = [],
                  cb: typing.Callable = None, help='', *args, **kwargs):
         self.cli_defs = cli_defs
-        self.argids = ArgID(self, [id])
+        self.argids = map_keys_to_dict([id], self)
         self.args = []
         self.cb = cb
         self.help = help
-
-# class StrictCommand(Command):
-    # def __init__(self, *args, **kwargs):
-        # super().__init__(*args, **kwargs)
-
-class ArgID():
-    ''' Maps many ids to a single common ArgInterfaceComponent
-
-    Allows you to retrieve an Option/Command definition using either the shortname, longname, or command id
-    '''
-    def __init__(self, comp: Command | Option, comp_ids=[]):
-        self.comp_ids = comp_ids
-        self.comp = comp
-        self.comp_map: dict[str, Command | Option] = {}
-
-        # Populate the comp_map with the various ids
-        for comp_id in self.comp_ids:
-            self.comp_map[comp_id] = self.comp
-
-    def get_comp(self, id: str):
-        return self.comp_map[id]
 
 # Flattens the ids of options, commands into a single dict
 class ArgsMap():
@@ -96,7 +80,7 @@ class ArgsMap():
         # Flatten all the ids into a single dict mapping
         cli_def: Command | Option
         for cli_def in cli_defs:
-            comp_map = cli_def.argids.comp_map
+            comp_map = cli_def .argids
             for id, comp in comp_map.items():
                 self.all_comp_ids.append(id)
                 self.all_comp_maps[id] = comp
