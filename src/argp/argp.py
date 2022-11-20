@@ -40,11 +40,7 @@ Command = typing.NewType("Command", ArgParser)
 Argp = typing.NewType("Argp", ArgParser)
 
 def map_keys_to_dict(keys: list[str], value: typing.Any):
-    ''' Creates a dictionary with multiple keys pointing to the same value '''
-    # multi_key_dict = {}
-    # for key in keys:
-        # multi_key_dict[key] = value
-    # return multi_key_dict
+    ''' Map multiple keys to the same value in a dict '''
     return {key:value for key in keys}
 
 class Option():
