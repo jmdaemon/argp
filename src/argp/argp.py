@@ -56,7 +56,6 @@ class Args:
 def argp_parse(argp: Args, argvs: list):
     ''' Parses the given command line arguments and returns a dict of the cli definitions & arguments if any '''
     logger.debug('Parsing arguments')
-    # active_comps = []
 
     index = 0
     for argv in argvs:
@@ -67,33 +66,22 @@ def argp_parse(argp: Args, argvs: list):
         logger.debug(f'{arg=}')
 
         if isinstance(arg, Command):
-            # nested_argmap = Args(arg.cli_defs)
-            # active_comps += argp_parse(nested_argmap, argvs[index:])
-            # argp.args.update(argp_parse(nested_argmap, argvs[index:]))
-            # argp.args.update(argp_parse(Args(arg.cli_defs), argvs[index - 1:]))
-
-            # cli_defs = Args(arg.cli_defs)
-
-            # argp.args.update(argp_parse(cli_defs, argvs))
-            # argp.args.update({argv: argp.cli_defs[argv]})
-
-            # argp.args.update(argp_parse(Args(arg.cli_defs), argvs[index:]))
+            # TODO: Callbacks
             argp.args.update({argv: argp.cli_defs[argv]})
-
-            # argp.args.update(argp_parse(cli_defs, argvs))
 
         elif isinstance(arg, Option):
             arg.val = True if arg.is_flag() else arg.val
 
+        # TODO Callbacks
+        # Allow for strict, positional, and sub commands
+        # Strit, positional will be easy, and subcommands should use argp's cli_defs
         if arg != None:
-            # active_comps.append(arg)
-            # argp.args.update({index: arg})
             argp.args.update({argv: arg})
             if hasattr(arg, 'cb') and (arg.cb != None):
-                # Pass arguments
+                # Pass arguments, this should be done in a better more generic way
+                # Does not support positional 'nargs'
                 arg.cb(argvs[index:])
         else:
-            # argp.args += argv
             argp.args[index] = argv
         index += 1
     return argp.args
@@ -113,4 +101,3 @@ class Argp():
 
     def parse(self):
         return argp_parse(self.argp, self.raw_args)
-

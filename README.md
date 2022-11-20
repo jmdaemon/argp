@@ -20,37 +20,65 @@ Meanwhile, directly parsing from `sys.argv` allows for more freedom but you also
     - Config handling, flags, options, option arguments
     - Common code reuse between projects
 
-# Features
+## Usage
 
-Usage:
-    1. Declare options & interface ahead of time
-    2. Design the interface how you want (enable/disable strict type checking, help message formatting, etc)
-    3. Parse options on command line
-    4. Retrieve all arguments, index into dictionary for variables
+1. Declare options & interface ahead of time
+2. Design the interface how you want (enable/disable strict type checking, help message formatting, etc)
+3. Parse options given
+4. Retrieve all arguments from the returned dictionar
 
-Ideas (TODO):
+## Features
+
+Important features are starred.
+
+Completed:
+- [X] Option, Command and Argument CLI types
+- [X] Options can be specified by their short or long names
+- [X] Basic no parameter callbacks
+- [X] All options/commands/arguments passed are stored into a dictionary returned by parse.
+
+Work in Progress:
+- [ ] \* More flexibility/modularity in `argp_parse` for custom command, option types
+- [ ] \* More generator options to create certain options/commands automatically
+- [ ] \* Global options to be shared/enabled across sub commands
+- [ ] \* Argparse-like 'nargs' variable (but only accepts an int)
+- [ ] \* Argparse-like 'type' var (Custom variable types for Options, Commands)
+    - [ ] Opt-in type checking at runtime
+- [ ] \* Argparse-like 'required' (Optional / Required options)
+
+Help Formatting;
+- [ ] \* Flat list help docstring listing all commands with their options
+- [ ] \* Tree help docstring listing all commands without options
+- [ ] \* -h, --help option specifies more specific help format message for commands
+- [ ] \* Command specific help message formatting.
+
+Optional:
+- [ ] 'dest' used to store values given to options (can be referenced with args.dest)
+- [ ] Alternative 'verbose' option that specifies levels of verbosity
+- [ ] Debug flag in Argp to enable/disable logging of argument parsing
+
 Options:
-- [ ] 'dest' used to store values given to options
-- [ ] 'id' used to rename the dest arg in args['dest']
-- [ ] Options can be turned into 'flags'.
-- [ ] Options can be activated by their short or long names
+- [ ] \* 'id' used to rename the dest arg in args['dest']
+- [ ] \* 'flag' to specify toggleable options with on/off values.
 
-General:
-- [ ] Any commands/options that were activated should go into a dictionary returned by parse.
-- [ ] Commands can only contain options for the forseeable moment.
+*Positional Command (Splice):*
 
-Positional Command (Splice):
-- [ ] When invoked, options are checked until an unknown option type is found, or none are left
+When invoked, options are checked until an unknown option type is found, or none are left
+
 - [ ] this splits the argv into a splice that is assigned to the positional command.
 
-Strict Command (Subtractive):
-- [ ] Treated as a completely separate parser that cannot detect global options
+*Strict Command (Subtractive):*
 
-Sub Command (Additive):
-- [ ] Reads global options as well as its own options
+When invoked, is treated as a completely separate parser from the main parser, that cannot detect global options.
 
-Callbacks
+*Sub Command (Additive):*
+
+When invoked, reads global options in addition to its own options
+
+*Callbacks:*
+
+Provides a custom function with some specified arguments (or none at all),
+
+to be invoked later when being parsed.
 - [ ] Lambda expressions, function objects or partials may be used.
 - [ ] Can accept arguments
-
-Forward Declarations of Types
