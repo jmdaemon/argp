@@ -1,6 +1,37 @@
 import typing, sys, inspect, os
 from loguru import logger
 
+# Usage:
+# 1. Declare options & interface ahead of time
+# 2. Design the interface how you want (enable/disable strict type checking, help message formatting, etc)
+# 3. Parse options on command line
+# 4. Retrieve all arguments, index into dictionary create 
+
+# Ideas (TODO):
+# Options:
+# 'dest' used to store values given to options
+# 'id' used to rename the dest arg in args['dest'] 
+# Options can be turned into 'flags'.
+# Options can be activated by their short or long names
+#
+# General:
+# Any commands/options that were activated should go into a dictionary returned by parse.
+# Commands can only contain options for the forseeable moment.
+#
+# Positional Command (Splice):
+# When invoked, options are checked until an unknown option type is found, or none are left
+# this splits the argv into a splice that is assigned to the positional command.
+#
+# Strict Command (Subtractive):
+# Treated as a completely separate parser that cannot detect global options
+#
+# Sub Command (Additive):
+# Reads global options as well as its own options
+#
+# Callbacks
+# - Lambda expressions, function objects or partials may be used.
+# - Can accept arguments
+
 # Forward Declarations of Types
 
 Option = typing.NewType("Option", None)
@@ -136,3 +167,4 @@ class Argp():
 
     def parse(self):
         return argp_parse(self.argp, self.raw_args)
+

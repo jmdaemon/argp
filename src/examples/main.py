@@ -48,5 +48,7 @@ def main():
     # Arguments and the activated components
     args = argp.argp.args
 
-    for argument in args:
-        print(f'{argument=}')
+    print(f'{args=}')
+
+    # for argument in args:
+        # print(f'{argument=}')
