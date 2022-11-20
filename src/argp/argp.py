@@ -1,13 +1,7 @@
-import typing, sys, inspect, os, collections
+import typing, sys
 from collections.abc import MutableMapping
 from collections import ChainMap
 from loguru import logger
-
-# Forward Declarations of Types
-Option = typing.NewType("Option", None)
-ArgParser = typing.NewType("ArgParser", None)
-Command = typing.NewType("Command", ArgParser)
-Argp = typing.NewType("Argp", ArgParser)
 
 # Helper functions
 def flatten_dict(d, parent_key='', sep='_'):
@@ -59,11 +53,10 @@ class Args:
     def get_arg(self, id: str):
         return None if not self.cli_defs.__contains__(id) else self.cli_defs[id]
 
-# def argp_parse(argp: ArgsMap, argvs: list):
 def argp_parse(argp: Args, argvs: list):
-    ''' Parses the given command line arguments and returns a list of the active cli components '''
+    ''' Parses the given command line arguments and returns a dict of the cli definitions & arguments if any '''
     logger.debug('Parsing arguments')
-    active_comps = []
+    # active_comps = []
 
     index = 0
     for argv in argvs:
@@ -74,21 +67,36 @@ def argp_parse(argp: Args, argvs: list):
         logger.debug(f'{arg=}')
 
         if isinstance(arg, Command):
-            nested_argmap = Args(arg.cli_defs)
-            active_comps += argp_parse(nested_argmap, argvs[index:])
+            # nested_argmap = Args(arg.cli_defs)
+            # active_comps += argp_parse(nested_argmap, argvs[index:])
+            # argp.args.update(argp_parse(nested_argmap, argvs[index:]))
+            # argp.args.update(argp_parse(Args(arg.cli_defs), argvs[index - 1:]))
+
+            # cli_defs = Args(arg.cli_defs)
+
+            # argp.args.update(argp_parse(cli_defs, argvs))
+            # argp.args.update({argv: argp.cli_defs[argv]})
+
+            # argp.args.update(argp_parse(Args(arg.cli_defs), argvs[index:]))
+            argp.args.update({argv: argp.cli_defs[argv]})
+
+            # argp.args.update(argp_parse(cli_defs, argvs))
 
         elif isinstance(arg, Option):
             arg.val = True if arg.is_flag() else arg.val
 
         if arg != None:
-            active_comps.append(arg)
-            if arg.cb != None:
-                arg.cb()
+            # active_comps.append(arg)
+            # argp.args.update({index: arg})
+            argp.args.update({argv: arg})
+            if hasattr(arg, 'cb') and (arg.cb != None):
+                # Pass arguments
+                arg.cb(argvs[index:])
         else:
             # argp.args += argv
             argp.args[index] = argv
-    index += 1
-    return active_comps
+        index += 1
+    return argp.args
 
 class Argp():
     def __init__(self, cli_defs: list, usage='', desc='', help_formatter=None):
