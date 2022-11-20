@@ -1,5 +1,6 @@
 import typing, sys, inspect, os, collections
 from collections.abc import MutableMapping
+from collections import ChainMap
 from loguru import logger
 
 # Usage:
@@ -58,20 +59,28 @@ def map_keys_to_dict(keys: list[str], value: typing.Any):
 
 def flatten_args(cli_defs: list):
     ''' Flatterns a list of cli ids and definitions into a dict '''
-    flat_cli_defs = {}
 
-    # Long way
-    # [cli_def for cli_def in cli_defs]
+    # cli_defs_flat_list = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
+
+    # flat_cli_defs = {}
+    # map(lambda dictionary: flat_cli_defs.update(dictionary), [flatten_dict(cli_def.argids, '','') for cli_def in cli_defs])
+    # return flat_cli_defs
+
+    return dict(ChainMap(*[flatten_dict(cli_def.argids, '','') for cli_def in cli_defs]))
+
+    # concat_dict = lambda dictionary: flat_cli_defs.update(dictionary)
+
+    # cli_defs_flat_list = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
+
+    # cli_defs_flat_list = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
+
+    # flat_cli_defs = {}
+
+    # Better
     # for cli_def in cli_defs:
         # argids: dict = cli_def.argids
-        # for key, arg in argids.items():
-            # flat_cli_defs[key] = arg
-    # [cli_def.argids for cli_def in cli_defs]
-    # Better
-    for cli_def in cli_defs:
-        argids: dict = cli_def.argids
-        flat_cli_defs.update({ key:arg for key,arg in argids.items() })
-    return flat_cli_defs
+        # flat_cli_defs.update({ key:arg for key,arg in argids.items() })
+    # return flat_cli_defs
 
     # One liner
     # asdf = lambda cli_def: flatten_dict(cli_def.argids, '','')
@@ -127,26 +136,6 @@ class Args:
 
     def get_arg(self, id: str):
         return None if not self.cli_defs.__contains__(id) else self.cli_defs[id]
-
-# Flattens the ids of options, commands into a single dict
-class ArgsMap():
-    def __init__(self, cli_defs: list):
-        self.all_comp_ids = []
-        self.all_comp_maps = {}
-        # self.raw_args = []
-        self.args = []
-
-        # Flatten all the ids into a single dict mapping
-        cli_def: Command | Option
-        for cli_def in cli_defs:
-            comp_map = cli_def .argids
-            for id, comp in comp_map.items():
-                self.all_comp_ids.append(id)
-                self.all_comp_maps[id] = comp
-
-    def get_comp(self, id: str):
-        res = None if not self.all_comp_maps.__contains__(id) else self.all_comp_maps[id]
-        return res
 
 # def argp_parse(argp: ArgsMap, argvs: list):
 def argp_parse(argp: Args, argvs: list):
