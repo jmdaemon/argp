@@ -59,53 +59,7 @@ def map_keys_to_dict(keys: list[str], value: typing.Any):
 
 def flatten_args(cli_defs: list):
     ''' Flatterns a list of cli ids and definitions into a dict '''
-
-    # cli_defs_flat_list = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
-
-    # flat_cli_defs = {}
-    # map(lambda dictionary: flat_cli_defs.update(dictionary), [flatten_dict(cli_def.argids, '','') for cli_def in cli_defs])
-    # return flat_cli_defs
-
     return dict(ChainMap(*[flatten_dict(cli_def.argids, '','') for cli_def in cli_defs]))
-
-    # concat_dict = lambda dictionary: flat_cli_defs.update(dictionary)
-
-    # cli_defs_flat_list = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
-
-    # cli_defs_flat_list = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
-
-    # flat_cli_defs = {}
-
-    # Better
-    # for cli_def in cli_defs:
-        # argids: dict = cli_def.argids
-        # flat_cli_defs.update({ key:arg for key,arg in argids.items() })
-    # return flat_cli_defs
-
-    # One liner
-    # asdf = lambda cli_def: flatten_dict(cli_def.argids, '','')
-    # flat_cli_defs = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
-    # return flat_cli_defs
-
-    # flat_cli_defs = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
-    # return flat_cli_defs
-    # flat_cli_defs = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
-
-    # return dict(map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs))
-
-    # cli_defs_flat_list = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
-
-    # return dict()
-
-        # flat_cli_defs + dict()
-        # [ flat_cli_defs [key]
-            # argids.items()
-
-
-        # comp_map = cli_def .argids
-        # for id, comp in comp_map.items():
-            # self.all_comp_ids.append(id)
-            # self.all_comp_maps[id] = comp
 
 class Option():
     def __init__(self, short: str, long: str, id:str = '', val: typing.Any = None, flag = False,
