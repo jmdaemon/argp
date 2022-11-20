@@ -1,4 +1,5 @@
-import typing, sys, inspect, os
+import typing, sys, inspect, os, collections
+from collections.abc import MutableMapping
 from loguru import logger
 
 # Usage:
@@ -39,9 +40,63 @@ ArgParser = typing.NewType("ArgParser", None)
 Command = typing.NewType("Command", ArgParser)
 Argp = typing.NewType("Argp", ArgParser)
 
+# Helper functions
+def flatten_dict(d, parent_key='', sep='_'):
+    ''' Flattens a nested dict into a flat dict '''
+    items = []
+    for k, v in d.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, MutableMapping):
+            items.extend(flatten_dict(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
+
 def map_keys_to_dict(keys: list[str], value: typing.Any):
     ''' Map multiple keys to the same value in a dict '''
     return {key:value for key in keys}
+
+def flatten_args(cli_defs: list):
+    ''' Flatterns a list of cli ids and definitions into a dict '''
+    flat_cli_defs = {}
+
+    # Long way
+    # [cli_def for cli_def in cli_defs]
+    # for cli_def in cli_defs:
+        # argids: dict = cli_def.argids
+        # for key, arg in argids.items():
+            # flat_cli_defs[key] = arg
+    # [cli_def.argids for cli_def in cli_defs]
+    # Better
+    for cli_def in cli_defs:
+        argids: dict = cli_def.argids
+        flat_cli_defs.update({ key:arg for key,arg in argids.items() })
+    return flat_cli_defs
+
+    # One liner
+    # asdf = lambda cli_def: flatten_dict(cli_def.argids, '','')
+    # flat_cli_defs = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
+    # return flat_cli_defs
+
+    # flat_cli_defs = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
+    # return flat_cli_defs
+    # flat_cli_defs = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
+
+    # return dict(map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs))
+
+    # cli_defs_flat_list = map(lambda cli_def: flatten_dict(cli_def.argids, '',''), cli_defs)
+
+    # return dict()
+
+        # flat_cli_defs + dict()
+        # [ flat_cli_defs [key]
+            # argids.items()
+
+
+        # comp_map = cli_def .argids
+        # for id, comp in comp_map.items():
+            # self.all_comp_ids.append(id)
+            # self.all_comp_maps[id] = comp
 
 class Option():
     def __init__(self, short: str, long: str, id:str = '', val: typing.Any = None, flag = False,
@@ -57,13 +112,21 @@ class Option():
 
 class Command():
     ''' Contains sub options '''
-    def __init__(self, id='', cli_defs: list = [],
-                 cb: typing.Callable = None, help='', *args, **kwargs):
+    def __init__(self, id = '', cli_defs = [], cb: typing.Callable = None, help='', *args, **kwargs):
         self.cli_defs = cli_defs
         self.argids = map_keys_to_dict([id], self)
         self.args = []
         self.cb = cb
         self.help = help
+
+class Args:
+    def __init__(self, cli_defs: list):
+        self.raw_args = []
+        self.cli_defs: dict = flatten_args(cli_defs)
+        self.args = {}
+
+    def get_arg(self, id: str):
+        return None if not self.cli_defs.__contains__(id) else self.cli_defs[id]
 
 # Flattens the ids of options, commands into a single dict
 class ArgsMap():
@@ -85,7 +148,8 @@ class ArgsMap():
         res = None if not self.all_comp_maps.__contains__(id) else self.all_comp_maps[id]
         return res
 
-def argp_parse(argp: ArgsMap, argvs: list):
+# def argp_parse(argp: ArgsMap, argvs: list):
+def argp_parse(argp: Args, argvs: list):
     ''' Parses the given command line arguments and returns a list of the active cli components '''
     logger.debug('Parsing arguments')
     active_comps = []
@@ -93,13 +157,13 @@ def argp_parse(argp: ArgsMap, argvs: list):
     index = 0
     for argv in argvs:
         logger.debug(f'Argument #{index + 1}: {argv}')
-        arg: Command | Option | None = argp.get_comp(argv)
+        arg: Command | Option | None = argp.get_arg(argv)
 
         logger.debug(f'Type: {type(arg)}')
         logger.debug(f'{arg=}')
 
         if isinstance(arg, Command):
-            nested_argmap = ArgsMap(arg.cli_defs)
+            nested_argmap = Args(arg.cli_defs)
             active_comps += argp_parse(nested_argmap, argvs[index:])
 
         elif isinstance(arg, Option):
@@ -110,7 +174,8 @@ def argp_parse(argp: ArgsMap, argvs: list):
             if arg.cb != None:
                 arg.cb()
         else:
-            argp.args += argv
+            # argp.args += argv
+            argp.args[index] = argv
     index += 1
     return active_comps
 
@@ -134,7 +199,7 @@ class Argp():
     '''
 
     def __init__(self, cli_defs: list, usage='', desc='', help_formatter=None):
-        self.argp = ArgsMap(cli_defs)
+        self.argp = Args(cli_defs)
 
         # Create HelpFormatter if not already made
         # if help_formatter == None:
