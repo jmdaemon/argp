@@ -3,39 +3,7 @@ from collections.abc import MutableMapping
 from collections import ChainMap
 from loguru import logger
 
-# Usage:
-# 1. Declare options & interface ahead of time
-# 2. Design the interface how you want (enable/disable strict type checking, help message formatting, etc)
-# 3. Parse options on command line
-# 4. Retrieve all arguments, index into dictionary create 
-
-# Ideas (TODO):
-# Options:
-# 'dest' used to store values given to options
-# 'id' used to rename the dest arg in args['dest'] 
-# Options can be turned into 'flags'.
-# Options can be activated by their short or long names
-#
-# General:
-# Any commands/options that were activated should go into a dictionary returned by parse.
-# Commands can only contain options for the forseeable moment.
-#
-# Positional Command (Splice):
-# When invoked, options are checked until an unknown option type is found, or none are left
-# this splits the argv into a splice that is assigned to the positional command.
-#
-# Strict Command (Subtractive):
-# Treated as a completely separate parser that cannot detect global options
-#
-# Sub Command (Additive):
-# Reads global options as well as its own options
-#
-# Callbacks
-# - Lambda expressions, function objects or partials may be used.
-# - Can accept arguments
-
 # Forward Declarations of Types
-
 Option = typing.NewType("Option", None)
 ArgParser = typing.NewType("ArgParser", None)
 Command = typing.NewType("Command", ArgParser)
@@ -123,24 +91,6 @@ def argp_parse(argp: Args, argvs: list):
     return active_comps
 
 class Argp():
-    ''' Highly customizeable cli arguments parser
-
-        This argument parsing library was created to address flaws in argparse,
-        and direct parsing from sys.argv.
-
-        Some gripes that I've found when using argparse are:
-            - Usage and other docstring names aren't capitalized, and are unable to be modified.
-            - Does not accept '-' or '--' as valid arguments (arguments will be "unknown" and will show the usage message)
-            - Only one subcommand/callback can be executed
-
-        When doing direct custom parsing from sys.argv:
-            - Lots of tedious work to check inputs
-            - No help/usage string by default
-            - Awkward inputs & input handling
-            - Specific to your project/no code reuse between programs
-
-    '''
-
     def __init__(self, cli_defs: list, usage='', desc='', help_formatter=None):
         self.argp = Args(cli_defs)
 
